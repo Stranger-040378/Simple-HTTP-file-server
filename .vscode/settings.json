@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "xstddef": "c",
+        "xtr1common": "c",
+        "initializer_list": "c",
+        "rttrailingstoporder.h": "c",
+        "*.tcc": "cpp"
+    },
+    "files.encoding": "utf8",
+    "spellright.language": "Russian",
+    "C_Cpp.dimInactiveRegions": false
+}

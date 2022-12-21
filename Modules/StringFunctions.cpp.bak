@@ -1,0 +1,112 @@
+#include "StringFunctions.hpp"
+
+using namespace std;
+
+string Trim(string inStr)
+{
+	return regex_replace(inStr, regex("^[[:space:]]+|[[:space:]]+$"), "");
+}
+
+string LTrim(string inStr)
+{
+	return regex_replace(inStr, regex("^[[:space:]]+"), "");
+}
+
+string RTrim(string inStr)
+{
+	return regex_replace(inStr, regex("[[:space:]]+$"), "");
+}
+
+string Gsub(string inStr, string Rx, string Rep)
+{
+	return regex_replace(inStr, regex(Rx), Rep);
+}
+
+string SToLower(string inStr)
+{
+	transform(inStr.begin(), inStr.end(), inStr.begin(), ::tolower);
+	
+	return inStr;
+}
+
+string SToUpper(string inStr)
+{
+	transform(inStr.begin(), inStr.end(), inStr.begin(), ::toupper);
+	
+	return inStr;
+}
+
+vector <string> RSplit(string & InStr, string Div, bool UseFirst)
+{
+	vector <string> RetVal;
+	regex Rx(Div); smatch Mr; bool Found;
+	size_t CurPos = 0, CurDiff;
+	
+	auto First = InStr.cbegin(); auto Last = InStr.cend();
+	
+	do
+	{
+		Found = regex_search(First, Last, Mr, Rx);
+		if (Found)
+		{
+			RetVal.push_back(move(InStr.substr(CurPos, Mr.position())));
+			
+			CurDiff = Mr.position() + Mr.length();
+			CurPos += CurDiff; First += CurDiff;
+			
+			if (UseFirst) break;
+		}
+	}
+	while (Found);
+	
+	if (CurPos < InStr.length())
+		RetVal.push_back(move(InStr.substr(CurPos)));
+	
+	return RetVal;
+}
+
+map <string, string>
+	KwParse(string & inStr, string FldDiv, string ArgDiv, string KeyWords, bool UseQuotes, bool UseFirst)
+{
+	map <string, string> RetVal;
+	
+	vector <string> KWrds(move(RSplit(KeyWords, ";")));
+	vector <string> Fields(move(RSplit(inStr, FldDiv)));
+	vector <string> KwVal;
+	string ProcKw, ProcArg; size_t MaxIndex;
+	
+	for (auto & Str : KWrds)
+		if (UseQuotes) Str = Trim(SToLower(Str));
+		else Str = Gsub(SToLower(Str), "[[:space:]]", "");
+	
+	for (auto & Str : Fields)
+	{
+		KwVal = RSplit(Str, ArgDiv, UseFirst);
+		MaxIndex = KwVal.size(); if (MaxIndex < 1) continue;
+		MaxIndex--;
+		
+		if (UseQuotes)
+		{
+			ProcKw = Trim(SToLower(KwVal[0]));
+			ProcKw = Gsub(ProcKw, "^\"|\"$", "");
+		}
+		else ProcKw = Gsub(SToLower(KwVal[0]), "[[:space:]]", "");
+		
+		for (auto & Kw : KWrds)
+		{
+			if (Kw == ProcKw)
+			{ 
+				if (MaxIndex > 0)
+				{
+					ProcArg = Trim(KwVal[MaxIndex]);
+					if (UseQuotes) ProcArg = Gsub(ProcArg, "^\"|\"$", "");
+				}
+				else ProcArg = "";
+				
+				RetVal.insert(pair <string, string> (Kw, ProcArg));
+			}
+		}
+	}
+	
+	return RetVal;
+}

@@ -1,0 +1,21 @@
+#ifndef String_Functions_h
+#define String_Functions_h
+
+#include <algorithm>
+#include <map>
+#include <vector>
+#include <string>
+#include <regex>
+
+using namespace std;
+
+extern string Trim(string inStr);
+extern string LTrim(string inStr);
+extern string RTrim(string inStr);
+extern string Gsub(string inStr, string Rx, string Rep);
+extern string SToLower(string inStr);
+extern string SToUpper(string inStr);
+extern vector <string> RSplit(string & InStr, string Div, bool UseFirst = false);
+extern map <string, string> KwParse(string & inStr, string FldDiv, string ArgDiv, string KeyWords, bool UseQuotes = true, bool UseFirst = false);
+
+#endif // String_Functions_h

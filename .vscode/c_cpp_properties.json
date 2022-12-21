@@ -1,0 +1,70 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "/usr/include"
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": "",
+                "path": [
+                    "/usr/include",
+                    "${workspaceRoot}"
+                ]
+            },
+            "intelliSenseMode": "clang-x64",
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks"
+            ]
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "/usr/include",
+                "/usr/include/**",
+                "/opt/sybase/include",
+                "${workspaceFolder}",
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/common",
+                "${workspaceFolder}/common/**"
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": "",
+                "path": [
+                    "/usr/include/*",
+                    "/usr/include",
+                    "${workspaceFolder}/*",
+                    "${workspaceFolder}",
+                    "${workspaceFolder}/common/*",
+                    "${workspaceFolder}/common"
+                ]
+            },
+            "intelliSenseMode": "gcc-x64",
+            "cStandard": "c99",
+            "cppStandard": "c++17"
+        },
+        {
+            "name": "Win32",
+            "includePath": [
+                "C:/Program Files (x86)/Microsoft Visual Studio/Shared/14.0/VC/include",
+                "C:/Qt/Tools/mingw492_32/i686-w64-mingw32/include"
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": "",
+                "path": [
+                    "C:/Program Files (x86)/Microsoft Visual Studio/Shared/14.0/VC/include",
+                    "C:/Qt/Tools/mingw492_32/i686-w64-mingw32/include",
+                    "${workspaceRoot}"
+                ]
+            },
+            "intelliSenseMode": "msvc-x64",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}
