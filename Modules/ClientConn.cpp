@@ -203,7 +203,7 @@ void ClientConn::TransmitProcess()
 		if (GotMessage)
 		{
 			TxMsg = this->ProcessTxData(InMsg);
-			cout << "TxMsg.Len = " << TxMsg.Len << endl;
+			//cout << "TxMsg.Len = " << TxMsg.Len << endl;
 			
 			if (TxMsg.Len > 0)
 			{
