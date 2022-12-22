@@ -55,8 +55,9 @@ private:
 	
 	// Transmit module variables
 	string SrvAnswer;
-	unique_ptr <char[]> UpDownBuf;
-	char *pDownBuf; size_t DownBufLen;
+	//unique_ptr <char[]> UpDownBuf;
+	//char *pDownBuf; size_t DownBufLen;
+	char ArDownBuf[6000];
 	
 	// HTTP Protocol support
 	HTTPSupport HTTPm;

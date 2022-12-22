@@ -44,7 +44,7 @@ Message & Message::operator= (const Message & RightMsg)
 	return *this;
 }
 
-Message & Message::operator= (Message && RightMsg)
+Message && Message::operator= (Message && RightMsg)
 {
 	Len = exchange(RightMsg.Len, 6);
 	UpData = move(RightMsg.UpData);
@@ -55,7 +55,7 @@ Message & Message::operator= (Message && RightMsg)
 	RightMsg.UpData = make_unique <char[]>(6);
 	strcpy(RightMsg.UpData.get(), "Empty");
 	
-	return *this;
+	return move(*this);
 }
 
 map <string, string> Message::EmptyParams = {};
@@ -64,7 +64,7 @@ atomic<size_t> ClientConn::ConnCounter = {0};
 
 ClientConn::ClientConn(int SockDescriptor, sockaddr_in clientAddress, sockaddr_in serverAddress)
 :	SockDesc (-1), ServerAddress {0}, ClientAddress {0},
-	StartRxTx( false ), RxProcess( false ), TxProcess { false },
+	StartRxTx( false ), RxProcess( false ), TxProcess { false }, TxPromValid { false },
 	ConnUsed { false }, SockDescValid { false },
 	RepeatTransmission { false }
 {
@@ -129,9 +129,9 @@ void ClientConn::ReceiveProcess()
 	bool RxInit = this->ProcessRxBuffer(NULL, 0);
 	if (!RxInit) { cout << "Init failure !!!"; return; }
 	
-	while (StartRxTx.load(memory_order_relaxed))
+	while (StartRxTx.load())
 	{
-		if ( SockDescValid.load(memory_order_relaxed) )
+		if ( SockDescValid.load() )
 			ReceivedCount = recv(SockDesc, RdBuffer, sizeof(RdBuffer) - 1, 0);
 		else
 			ReceivedCount = -1;
@@ -143,13 +143,13 @@ void ClientConn::ReceiveProcess()
 		else if (ReceivedCount == 0)
 		{
 			cout << endl << "client disconnected..." << endl;
-			StartRxTx.store(false, memory_order_relaxed);
+			StartRxTx.store(false);
 			break;
 		}
 		else
 		{
 			cout << endl << "Rx Error..." << endl;
-			StartRxTx.store(false, memory_order_relaxed);
+			StartRxTx.store(false);
 			break;
 		}
 	}
@@ -176,9 +176,9 @@ void ClientConn::TransmitProcess()
 		return;
 	}
 	
-	while (StartRxTx.load(memory_order_relaxed))
+	while (StartRxTx.load())
 	{
-		if (!RepeatTransmission.load(memory_order_relaxed))
+		if (!RepeatTransmission.load())
 		{
 			MuTxQueueLock.lock();
 			
@@ -195,7 +195,6 @@ void ClientConn::TransmitProcess()
 		else
 		{
 			//cout << "Use repeat transmission." << endl;
-			
 			InMsg.DataType = TxMsg.DataType;
 			GotMessage = true;
 		}
@@ -207,19 +206,10 @@ void ClientConn::TransmitProcess()
 			
 			if (TxMsg.Len > 0)
 			{
-				if ( SockDescValid.load(memory_order_relaxed) )
+				if ( SockDescValid.load() )
 				{
-					try
-					{
-						//TransmittedCount = send(SockDesc, TxMsg.pData, TxMsg.Len, 0);
-						TransmittedCount = write(SockDesc, TxMsg.pData, TxMsg.Len);
-					}
-					catch (...)
-					{
-						TransmittedCount = 0;
-						StartRxTx.store(false, memory_order_relaxed);
-						break;
-					}
+					TransmittedCount = send(SockDesc, TxMsg.pData, TxMsg.Len, 0);
+					//TransmittedCount = write(SockDesc, TxMsg.pData, TxMsg.Len);
 				}
 				else
 					TransmittedCount = 0;
@@ -352,6 +342,7 @@ void ClientConn::SetTxLock()
 	
 	TxLockPromise = move(promise <void>());
 	TxLockFut = TxLockPromise.get_future();
+	TxPromValid.store(true);
 }
 
 void ClientConn::UnlockTxThr()
@@ -360,7 +351,11 @@ void ClientConn::UnlockTxThr()
 	
 	try
 	{
-		if (TxLockFut.valid()) TxLockPromise.set_value();
+		if (TxPromValid.load() && TxLockFut.valid())
+		{
+			TxPromValid.store(false);
+			TxLockPromise.set_value();
+		}
 	}
 	catch(const std::exception & e)
 	{
@@ -370,7 +365,7 @@ void ClientConn::UnlockTxThr()
 
 void ClientConn::StopTxThread()
 {
-	StartRxTx.store(false, memory_order_relaxed);
+	StartRxTx.store(false);
 	
 	while (TxProcess.load())
 	{

@@ -43,7 +43,7 @@ struct Message
 	
 	Message & operator= (const Message & RightMsg);
 	
-	Message & operator= (Message && RightMsg);
+	Message && operator= (Message && RightMsg);
 };
 
 class ClientConn
@@ -54,7 +54,7 @@ class ClientConn
 	promise <void> TxLockPromise;
 	future <void> TxLockFut;
 	atomic<bool>
-		StartRxTx, RxProcess, TxProcess,
+		StartRxTx, RxProcess, TxProcess, TxPromValid,
 		SockDescValid, ConnUsed, RepeatTransmission;
 	
 	static atomic<size_t> ConnCounter, ObjCounter;

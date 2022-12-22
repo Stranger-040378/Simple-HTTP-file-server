@@ -9,9 +9,9 @@ FileServer::FileServer(int SockDescriptor, sockaddr_in clientAddress, sockaddr_i
 	UpStrBuf.reset(new char[StrBufLen]);
 	pStrBuf = UpStrBuf.get();
 	
-	DownBufLen = 6000;
-	UpDownBuf.reset(new char[DownBufLen + 200]);
-	pDownBuf = UpDownBuf.get();
+	//DownBufLen = 6000;
+	//UpDownBuf.reset(new char[DownBufLen + 200]);
+	//pDownBuf = UpDownBuf.get();
 }
 
 FileServer::~FileServer()
@@ -468,14 +468,15 @@ ClientConn::TxData FileServer::ProcessTxData(Message & InMsg)
 		break;
 		case TxCmds::SendFileContent:
 			
-			size_t RdLen = FSObj.ReadBuffer(pDownBuf, DownBufLen);
+			//size_t RdLen = FSObj.ReadBuffer(pDownBuf, DownBufLen);
+			size_t RdLen = FSObj.ReadBuffer(ArDownBuf, sizeof(ArDownBuf));
 			if (!RdLen)
 			{
 				FSObj.CloseFile(); StopRepeatTx();
 			}
 			
 			OutMsg.DataType = TxCmds::SendFileContent;
-			OutMsg.pData = pDownBuf; OutMsg.Len = RdLen;
+			OutMsg.pData = ArDownBuf; OutMsg.Len = RdLen;
 			
 			//cout << endl << "-----------------------------------" << endl;
 			//cout << OutMsg.pData;
