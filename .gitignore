@@ -342,3 +342,8 @@ MoexClientRegistrator.cbp
 
 #######################################
 /src/moex_client_registrator_autogen
+
+# Build and vscode folders
+
+build/
+.vscode/
